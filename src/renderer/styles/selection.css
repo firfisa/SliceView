@@ -1,0 +1,227 @@
+/* 选择工具页面样式 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: transparent;
+    overflow: hidden;
+    user-select: none;
+}
+
+.selection-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
+/* 背景显示区域 */
+.background-display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+}
+
+.background-display video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/* 捕获错误状态样式 */
+.capture-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: #dc3545;
+    text-align: center;
+}
+
+.capture-error .error-icon {
+    font-size: 48px;
+    opacity: 0.7;
+}
+
+.capture-error .error-text {
+    font-size: 14px;
+    max-width: 80%;
+    line-height: 1.4;
+}
+
+/* 选择覆盖层 */
+.selection-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+/* 选择框 */
+.selection-box {
+    position: absolute;
+    border: 2px solid #007acc;
+    background: rgba(0, 122, 204, 0.1);
+    display: none;
+    pointer-events: none;
+}
+
+.selection-box.active {
+    display: block;
+}
+
+/* 坐标显示 */
+.selection-coords {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+.selection-coords span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.selection-coords span:last-child {
+    margin-bottom: 0;
+}
+
+/* 操作提示 */
+.selection-hints {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.hint-item:last-child {
+    margin-bottom: 0;
+}
+
+.hint-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* 控制按钮 */
+.selection-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+.control-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    pointer-events: auto;
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-btn {
+    background: #28a745;
+    color: white;
+}
+
+.confirm-btn:not(:disabled):hover {
+    background: #218838;
+}
+
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #c82333;
+}
+
+.btn-icon {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .selection-coords {
+        top: 10px;
+        left: 10px;
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .selection-hints {
+        bottom: 10px;
+        right: 10px;
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .selection-controls {
+        bottom: 10px;
+        left: 10px;
+        gap: 8px;
+    }
+    
+    .control-btn {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+} 

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SliceView - 区域选择工具</title>
+    <link rel="stylesheet" href="styles/selection.css">
+</head>
+<body>
+    <div class="selection-container">
+        <!-- 背景显示区域 -->
+        <div id="backgroundDisplay" class="background-display">
+            <!-- 这里将显示目标窗口的实时画面 -->
+        </div>
+        
+        <!-- 选择覆盖层 -->
+        <div id="selectionOverlay" class="selection-overlay">
+            <!-- 选择框 -->
+            <div id="selectionBox" class="selection-box"></div>
+            
+            <!-- 坐标显示 -->
+            <div id="selectionCoords" class="selection-coords">
+                <span id="startCoords">起点: (0, 0)</span>
+                <span id="currentCoords">当前位置: (0, 0)</span>
+                <span id="selectionSize">选择区域: 0 x 0</span>
+            </div>
+            
+            <!-- 操作提示 -->
+            <div class="selection-hints">
+                <div class="hint-item">
+                    <span class="hint-icon">🖱️</span>
+                    <span>拖拽鼠标选择区域</span>
+                </div>
+                <div class="hint-item">
+                    <span class="hint-icon">↵</span>
+                    <span>按回车确认选择</span>
+                </div>
+                <div class="hint-item">
+                    <span class="hint-icon">⎋</span>
+                    <span>按ESC取消选择</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="selection-controls">
+            <button id="confirmBtn" class="control-btn confirm-btn" disabled>
+                <span class="btn-icon">✓</span>
+                确认选择
+            </button>
+            <button id="cancelBtn" class="control-btn cancel-btn">
+                <span class="btn-icon">✗</span>
+                取消
+            </button>
+        </div>
+    </div>
+
+    <script src="js/selectionTool.js"></script>
+    <script src="js/selectionApp.js"></script>
+</body>
+</html> 

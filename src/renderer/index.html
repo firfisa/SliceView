@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SliceView - 窗口区域选择工具</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="app-title">
+                    <span class="app-icon">✂️</span>
+                    SliceView
+                </h1>
+                <span class="app-version" id="appVersion">v1.0.0</span>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" id="refreshBtn">
+                    <span class="btn-icon">🔄</span>
+                    刷新
+                </button>
+                <button class="btn btn-primary" id="captureBtn">
+                    <span class="btn-icon">📷</span>
+                    开始捕获
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧边栏 -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="section-title">选择源</h3>
+                    <div class="source-tabs">
+                        <button class="tab-btn active" data-tab="windows">应用窗口</button>
+                        <button class="tab-btn" data-tab="screens">屏幕</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="section-title">窗口列表</h3>
+                    <div class="window-list" id="windowList">
+                        <div class="loading-placeholder">
+                            <div class="spinner"></div>
+                            <p>正在加载窗口列表...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="section-title">已捕获区域</h3>
+                    <div class="captured-list" id="capturedList">
+                        <div class="empty-placeholder">
+                            <p>暂无捕获区域</p>
+                            <small>选择窗口并框选区域开始使用</small>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 右侧预览区域 -->
+            <section class="preview-area">
+                <div class="preview-header">
+                    <h3 class="section-title">预览区域</h3>
+                    <div class="preview-controls">
+                        <button class="btn btn-small" id="zoomInBtn">放大</button>
+                        <button class="btn btn-small" id="zoomOutBtn">缩小</button>
+                        <button class="btn btn-small" id="resetZoomBtn">重置</button>
+                    </div>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-placeholder">
+                        <div class="placeholder-icon">🖥️</div>
+                        <h3>选择窗口开始预览</h3>
+                        <p>从左侧列表中选择一个应用窗口，然后点击"开始捕获"按钮</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 状态栏 -->
+        <footer class="status-bar">
+            <div class="status-left">
+                <span class="status-item">
+                    <span class="status-icon">📊</span>
+                    就绪
+                </span>
+            </div>
+            <div class="status-right">
+                <span class="status-item">
+                    <span class="status-icon">💾</span>
+                    内存使用: <span id="memoryUsage">0 MB</span>
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 区域选择覆盖层 -->
+    <div class="selection-overlay" id="selectionOverlay" style="display: none;">
+        <div class="selection-info">
+            <span class="selection-text">拖拽选择区域</span>
+            <span class="selection-coords" id="selectionCoords">0, 0</span>
+        </div>
+        <div class="selection-box" id="selectionBox"></div>
+    </div>
+
+    <!-- 加载脚本 -->
+    <script src="js/main.js"></script>
+    <script src="js/windowManager.js"></script>
+    <script src="js/selectionTool.js"></script>
+    <script src="js/uiManager.js"></script>
+</body>
+</html> 
