@@ -1,4 +1,4 @@
-/* 切片页面样式 */
+/* 切片页面样式 - 优化版 */
 
 * {
     margin: 0;
@@ -8,240 +8,167 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: #f5f5f5;
+    background: transparent;
     overflow: hidden;
     user-select: none;
+    cursor: default;
 }
 
 .slice-container {
     width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    position: relative;
+    background: transparent;
 }
 
-/* 切片内容区域 */
+/* 主要内容区域 - 占满整个窗口 */
 .slice-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: transparent;
 }
 
-/* 切片头部 */
-.slice-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    min-height: 48px;
-}
-
-.slice-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.title-icon {
-    font-size: 18px;
-}
-
-.slice-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.control-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-.control-btn:active {
-    transform: translateY(0);
-}
-
-.btn-icon {
-    font-size: 14px;
-}
-
-/* 切片主体 */
-.slice-body {
-    flex: 1;
-    padding: 16px;
-    overflow: auto;
-    background: #fafafa;
-}
-
+/* 切片显示区域 - 移除所有边距和圆角 */
 .slice-display {
     width: 100%;
     height: 100%;
-    min-height: 200px;
-    border: 2px dashed #ddd;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    border-radius: 0; /* 移除圆角 */
 }
 
+/* 占位符样式 */
 .slice-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    color: #999;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: #fff;
     text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .placeholder-icon {
     font-size: 48px;
-    opacity: 0.5;
+    opacity: 0.8;
 }
 
 .placeholder-text {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
 }
 
-/* 切片底部 */
-.slice-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    min-height: 48px;
-}
-
-.slice-info {
-    display: flex;
-    gap: 16px;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
+.placeholder-hint {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
     font-size: 12px;
-    color: #6c757d;
+    line-height: 1.6;
+    opacity: 0.9;
 }
 
-.info-label {
-    font-weight: 500;
+.placeholder-hint p {
+    margin: 4px 0;
 }
 
-.info-value {
-    font-family: 'Courier New', monospace;
-    color: #495057;
+/* 悬浮控制面板 */
+.slice-controls-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
 }
 
-.slice-actions {
+.slice-container:hover .slice-controls-overlay {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.controls-group {
     display: flex;
     gap: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.action-btn {
-    width: 32px;
-    height: 32px;
+.control-btn {
+    width: 36px;
+    height: 36px;
     border: none;
     border-radius: 6px;
-    background: #e9ecef;
-    color: #6c757d;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    font-size: 16px;
 }
 
-.action-btn:hover {
-    background: #dee2e6;
-    color: #495057;
-    transform: translateY(-1px);
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
-.action-btn:active {
-    transform: translateY(0);
+.control-btn:active {
+    transform: scale(0.95);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .slice-header {
-        padding: 8px 12px;
-        min-height: 40px;
-    }
-    
-    .slice-title {
-        font-size: 14px;
-    }
-    
-    .title-icon {
-        font-size: 16px;
-    }
-    
-    .control-btn {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .btn-icon {
-        font-size: 12px;
-    }
-    
-    .slice-body {
-        padding: 12px;
-    }
-    
-    .slice-footer {
-        padding: 8px 12px;
-        min-height: 40px;
-    }
-    
-    .slice-info {
-        gap: 12px;
-    }
-    
-    .info-item {
-        font-size: 11px;
-    }
-    
-    .action-btn {
-        width: 28px;
-        height: 28px;
-    }
+.control-btn.close-btn:hover {
+    background: rgba(255, 59, 48, 0.8);
 }
 
-/* 全屏模式 */
-.slice-container.fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
+/* 窗口拖动指示器 */
+.drag-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 2000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.drag-indicator.show {
+    display: flex;
+}
+
+.drag-icon {
+    font-size: 18px;
+}
+
+/* 视频元素样式 - 优化显示质量 */
+.slice-display video {
+    width: 100%;
+    height: 100%;
+    object-fit: none; /* 使用none以保持原始尺寸和比例 */
+    background: #000;
+    cursor: default;
+    pointer-events: none; /* 禁用所有鼠标交互 */
+    border-radius: 0; /* 移除圆角 */
 }
 
 /* 固定位置模式 */
@@ -249,15 +176,8 @@ body {
     position: fixed;
 }
 
-/* 最小化模式 */
-.slice-container.minimized {
-    height: 48px;
-    overflow: hidden;
-}
-
-.slice-container.minimized .slice-body,
-.slice-container.minimized .slice-footer {
-    display: none;
+.slice-container.pinned .control-btn[title*="固定"] {
+    background: rgba(52, 199, 89, 0.8);
 }
 
 /* 错误状态样式 */
@@ -268,8 +188,9 @@ body {
     justify-content: center;
     height: 100%;
     gap: 16px;
-    color: #dc3545;
+    color: #ff453a;
     text-align: center;
+    background: #1c1c1e;
 }
 
 .error-icon {
@@ -283,35 +204,6 @@ body {
     line-height: 1.4;
 }
 
-/* 视频元素样式 */
-.slice-display video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-    transition: transform 0.1s ease;
-    cursor: default;
-}
-
-/* 交互状态样式 */
-.slice-display video.interactive {
-    cursor: grab;
-}
-
-.slice-display video.interactive:active {
-    cursor: grabbing;
-}
-
-/* 拖拽时的视觉反馈 */
-.slice-display video.dragging {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-/* 变换时的平滑过渡 */
-.slice-display video {
-    transition: transform 0.1s ease, box-shadow 0.2s ease;
-}
-
 /* 成功状态样式 */
 .slice-success {
     display: flex;
@@ -320,8 +212,9 @@ body {
     justify-content: center;
     height: 100%;
     gap: 16px;
-    color: #28a745;
+    color: #30d158;
     text-align: center;
+    background: #1c1c1e;
 }
 
 .success-icon {
@@ -333,4 +226,36 @@ body {
     font-size: 14px;
     max-width: 80%;
     line-height: 1.4;
-} 
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .slice-controls-overlay {
+        top: 8px;
+        right: 8px;
+    }
+    
+    .controls-group {
+        padding: 6px;
+        gap: 6px;
+    }
+    
+    .control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .placeholder-icon {
+        font-size: 36px;
+    }
+    
+    .placeholder-text {
+        font-size: 16px;
+    }
+    
+    .placeholder-hint {
+        font-size: 11px;
+        padding: 12px;
+    }
+}

@@ -3,66 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SliceView - 内容切片</title>
+    <title>SliceView</title>
     <link rel="stylesheet" href="styles/slice.css">
 </head>
 <body>
     <div class="slice-container">
-        <!-- 切片内容区域 -->
-        <div class="slice-content">
-            <div class="slice-header">
-                <div class="slice-title">
-                    <span class="title-icon">📋</span>
-                    <span class="title-text">内容切片</span>
-                </div>
-                <div class="slice-controls">
-                    <button id="pinBtn" class="control-btn pin-btn" title="固定位置">
-                        <span class="btn-icon">📌</span>
-                    </button>
-                    <button id="minimizeBtn" class="control-btn minimize-btn" title="最小化">
-                        <span class="btn-icon">➖</span>
-                    </button>
-                    <button id="closeBtn" class="control-btn close-btn" title="关闭">
-                        <span class="btn-icon">✗</span>
-                    </button>
-                </div>
+        <!-- 隐藏的控制面板，鼠标悬停时显示 -->
+        <div class="slice-controls-overlay" id="controlsOverlay">
+            <div class="controls-group">
+                <button id="pinBtn" class="control-btn" title="固定位置 (P)">📌</button>
+                <button id="refreshBtn" class="control-btn" title="刷新内容 (F5)">🔄</button>
+                <button id="resetBtn" class="control-btn" title="重置缩放 (R)">⌂</button>
+                <button id="closeBtn" class="control-btn close-btn" title="关闭 (ESC)">✗</button>
             </div>
-            
-            <div class="slice-body">
-                <div id="sliceDisplay" class="slice-display">
-                    <div class="slice-placeholder">
-                        <span class="placeholder-icon">🖼️</span>
-                        <span class="placeholder-text">切片内容将在这里显示</span>
+        </div>
+        
+        <!-- 主要内容区域 -->
+        <div class="slice-content">
+            <div id="sliceDisplay" class="slice-display">
+                <div class="slice-placeholder">
+                    <span class="placeholder-icon">🖼️</span>
+                    <span class="placeholder-text">切片内容将在这里显示</span>
+                    <div class="placeholder-hint">
+                        <p>快捷键提示：</p>
+                        <p>• 右键长按拖动：移动窗口</p>
+                        <p>• ESC：关闭窗口</p>
+                        <p>• F5：刷新内容</p>
+                        <p>• R：重置缩放</p>
+                        <p>• P：固定位置</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="slice-footer">
-                <div class="slice-info">
-                    <span class="info-item">
-                        <span class="info-label">尺寸:</span>
-                        <span id="sizeInfo" class="info-value">0 x 0</span>
-                    </span>
-                    <span class="info-item">
-                        <span class="info-label">位置:</span>
-                        <span id="positionInfo" class="info-value">(0, 0)</span>
-                    </span>
-                </div>
-                <div class="slice-actions">
-                    <button id="resetBtn" class="action-btn reset-btn" title="重置位置">
-                        <span class="btn-icon">⌂</span>
-                    </button>
-                    <button id="refreshBtn" class="action-btn refresh-btn" title="刷新内容">
-                        <span class="btn-icon">🔄</span>
-                    </button>
-                    <button id="fullscreenBtn" class="action-btn fullscreen-btn" title="全屏显示">
-                        <span class="btn-icon">⛶</span>
-                    </button>
-                </div>
-            </div>
+        </div>
+        
+        <!-- 窗口拖动指示器 -->
+        <div class="drag-indicator" id="dragIndicator">
+            <span class="drag-icon">✋</span>
+            <span class="drag-text">窗口移动模式</span>
         </div>
     </div>
 
     <script src="js/sliceApp.js"></script>
 </body>
-</html> 
+</html>

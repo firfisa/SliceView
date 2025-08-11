@@ -409,8 +409,15 @@ class SliceViewApp {
     }
 
     handleWindowResize() {
-        // 处理窗口大小变化
-        console.log('窗口大小已变化');
+        // 添加防抖机制，避免无限循环
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
+        
+        this.resizeTimeout = setTimeout(() => {
+            console.log('窗口大小已变化');
+            // 这里可以添加实际的窗口大小调整逻辑
+        }, 100);
     }
 
     updateStatus(message) {
@@ -456,4 +463,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // 导出应用类（用于测试）
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SliceViewApp;
-} 
+}

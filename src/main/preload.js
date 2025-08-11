@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
     getAppName: () => ipcRenderer.invoke('get-app-name'),
     
+    // 移动窗口
+    moveWindow: (deltaX, deltaY) => ipcRenderer.invoke('move-window', deltaX, deltaY),
+    
     // 监听切片数据
     onSliceData: (callback) => {
         ipcRenderer.on('slice-data', (event, data) => callback(data));
@@ -74,4 +77,4 @@ contextBridge.exposeInMainWorld('utils', {
             }
         };
     }
-}); 
+});

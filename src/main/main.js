@@ -153,12 +153,16 @@ ipcMain.handle('start-capture', async (event, windowId) => {
       console.log('主窗口已隐藏');
     }
 
-    // 创建选择工具窗口
+    // 获取主屏幕尺寸
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.bounds;
+
+    // 创建选择工具窗口（全屏显示）
     const selectionWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      x: 100,
-      y: 100,
+      width: screenWidth,
+      height: screenHeight,
+      x: 0,
+      y: 0,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -168,12 +172,13 @@ ipcMain.handle('start-capture', async (event, windowId) => {
       title: 'SliceView - 区域选择工具',
       icon: path.join(__dirname, '../../assets/icon.png'),
       show: false,
-      resizable: true,
-      minimizable: true,
-      maximizable: true,
-      frame: true,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      frame: false, // 无边框全屏
       transparent: false,
-      alwaysOnTop: true
+      alwaysOnTop: true,
+      fullscreen: true // 全屏模式
     });
 
     // 加载选择工具页面
@@ -183,10 +188,10 @@ ipcMain.handle('start-capture', async (event, windowId) => {
     // 等待页面加载完成后开始捕获内容
     selectionWindow.webContents.once('did-finish-load', async () => {
       try {
-        // 获取目标窗口或屏幕的源
+        // 获取目标窗口或屏幕的源 - 提高缩略图质量
         const sources = await desktopCapturer.getSources({
           types: ['window', 'screen'],
-          thumbnailSize: { width: 1920, height: 1080 }
+          thumbnailSize: { width: 3840, height: 2160 }
         });
 
         const targetSource = sources.find(source => source.id === windowId);
@@ -237,10 +242,10 @@ ipcMain.handle('complete-selection', async (event, selectionData) => {
       throw new Error('未找到目标窗口ID');
     }
 
-    // 捕获目标窗口或屏幕的内容
+    // 捕获目标窗口或屏幕的内容 - 提高缩略图质量
     const sources = await desktopCapturer.getSources({
       types: ['window', 'screen'],
-      thumbnailSize: { width: 1920, height: 1080 }
+      thumbnailSize: { width: 3840, height: 2160 }
     });
 
     const targetSource = sources.find(source => source.id === targetWindowId);
@@ -249,11 +254,12 @@ ipcMain.handle('complete-selection', async (event, selectionData) => {
     }
 
     // 创建切片窗口（始终置顶）
+    // 简化坐标计算，直接使用选择坐标
     const sliceWindow = new BrowserWindow({
-      width: selectionData.width || 400,
-      height: selectionData.height || 300,
-      x: selectionData.x || 100,
-      y: selectionData.y || 100,
+      width: Math.round(selectionData.width),
+      height: Math.round(selectionData.height),
+      x: Math.round(selectionData.x),
+      y: Math.round(selectionData.y),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -263,12 +269,14 @@ ipcMain.handle('complete-selection', async (event, selectionData) => {
       title: 'SliceView - 内容切片',
       icon: path.join(__dirname, '../../assets/icon.png'),
       show: false,
-      resizable: true,
+      resizable: false, // 禁用调整大小，确保尺寸固定
       minimizable: true,
-      maximizable: true,
-      frame: true,
+      maximizable: false, // 禁用最大化
+      frame: false, // 移除标题栏和菜单栏
       transparent: false,
-      alwaysOnTop: true
+      alwaysOnTop: true,
+      skipTaskbar: false, // 暂时在任务栏显示，方便调试
+      useContentSize: false // 确保使用窗口尺寸而不是内容尺寸
     });
 
     // 加载切片内容页面
@@ -277,18 +285,53 @@ ipcMain.handle('complete-selection', async (event, selectionData) => {
 
     // 等待页面加载完成后再显示
     sliceWindow.webContents.once('did-finish-load', () => {
+      console.log('切片窗口页面加载完成，准备传递数据');
+      
       // 传递捕获数据到切片窗口
-      sliceWindow.webContents.send('slice-data', {
+      const sliceData = {
         sourceId: targetSource.id,
-        selectionData: selectionData,
+        selectionData: {
+          ...selectionData,
+          sourceWidth: targetSource.thumbnail.getSize().width,
+          sourceHeight: targetSource.thumbnail.getSize().height
+        },
         windowInfo: {
           name: targetSource.name,
           id: targetSource.id
         }
-      });
+      };
       
+      console.log('准备发送的切片数据:', sliceData);
+      
+      // 立即显示窗口，然后发送数据
       sliceWindow.show();
-      console.log('切片窗口已显示，数据已传递');
+      console.log('切片窗口已显示，窗口位置:', sliceWindow.getPosition());
+      console.log('切片窗口尺寸:', sliceWindow.getSize());
+      
+      // 延迟发送数据，确保渲染进程已完全准备好
+      setTimeout(() => {
+        sliceWindow.webContents.send('slice-data', sliceData);
+        console.log('切片数据已发送');
+      }, 500);
+    });
+    
+    // 添加错误处理
+    sliceWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+      console.error('切片窗口加载失败:', errorCode, errorDescription);
+    });
+    
+    // 添加控制台消息监听
+    sliceWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+      console.log(`[切片窗口控制台] ${message}`);
+    });
+    
+    // 添加窗口显示事件监听
+    sliceWindow.on('show', () => {
+      console.log('切片窗口显示事件触发');
+    });
+    
+    sliceWindow.on('ready-to-show', () => {
+      console.log('切片窗口准备显示');
     });
 
     // 存储切片窗口引用
@@ -344,6 +387,22 @@ ipcMain.handle('get-app-name', () => {
   return app.getName();
 });
 
+// 新增：移动窗口
+ipcMain.handle('move-window', (event, deltaX, deltaY) => {
+  try {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) {
+      const [currentX, currentY] = window.getPosition();
+      window.setPosition(currentX + deltaX, currentY + deltaY);
+      return { success: true };
+    }
+    return { success: false, error: '未找到窗口' };
+  } catch (error) {
+    console.error('移动窗口失败:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // 开发模式下的热重载
 if (isDev) {
   require('electron-reload')(__dirname, {
@@ -351,4 +410,4 @@ if (isDev) {
     forceHardReset: true,
     hardResetMethod: 'exit'
   });
-} 
+}

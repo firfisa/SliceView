@@ -212,18 +212,75 @@ class SelectionApp {
         try {
             console.log('确认选择，发送数据到主进程');
             
-            const selectionData = {
-                x: Math.min(this.startX, this.currentX),
-                y: Math.min(this.startY, this.currentY),
-                width: Math.abs(this.currentX - this.startX),
-                height: Math.abs(this.currentY - this.startY),
-                startX: this.startX,
-                startY: this.startY,
-                endX: this.currentX,
-                endY: this.currentY
-            };
+            // 计算选择区域
+            const windowX = Math.min(this.startX, this.currentX);
+            const windowY = Math.min(this.startY, this.currentY);
+            const windowWidth = Math.abs(this.currentX - this.startX);
+            const windowHeight = Math.abs(this.currentY - this.startY);
             
-            const result = await window.electronAPI.completeSelection(selectionData);
+            console.log('窗口坐标选择区域:', { windowX, windowY, windowWidth, windowHeight });
+            
+            // 如果有视频显示信息，进行坐标转换
+            let finalSelectionData;
+            
+            if (this.videoDisplayInfo) {
+                console.log('进行坐标转换，视频显示信息:', this.videoDisplayInfo);
+                
+                // 将窗口坐标转换为视频显示区域内的坐标
+                const videoX = windowX - this.videoDisplayInfo.offsetX;
+                const videoY = windowY - this.videoDisplayInfo.offsetY;
+                
+                console.log('视频显示区域内的坐标:', { videoX, videoY });
+                
+                // 检查选择区域是否在视频显示范围内
+                if (videoX < 0 || videoY < 0 || 
+                    videoX + windowWidth > this.videoDisplayInfo.displayWidth ||
+                    videoY + windowHeight > this.videoDisplayInfo.displayHeight) {
+                    console.warn('选择区域超出视频显示范围，将进行裁剪');
+                }
+                
+                // 计算缩放比例：从显示尺寸到原始视频尺寸
+                const scaleX = this.videoDisplayInfo.videoWidth / this.videoDisplayInfo.displayWidth;
+                const scaleY = this.videoDisplayInfo.videoHeight / this.videoDisplayInfo.displayHeight;
+                
+                console.log('缩放比例:', { scaleX, scaleY });
+                
+                // 转换为原始视频坐标
+                const finalX = Math.max(0, videoX * scaleX);
+                const finalY = Math.max(0, videoY * scaleY);
+                const finalWidth = Math.min(windowWidth * scaleX, this.videoDisplayInfo.videoWidth - finalX);
+                const finalHeight = Math.min(windowHeight * scaleY, this.videoDisplayInfo.videoHeight - finalY);
+                
+                console.log('最终视频坐标:', { finalX, finalY, finalWidth, finalHeight });
+                
+                finalSelectionData = {
+                    x: Math.round(finalX),
+                    y: Math.round(finalY),
+                    width: Math.round(finalWidth),
+                    height: Math.round(finalHeight),
+                    startX: Math.round(finalX),
+                    startY: Math.round(finalY),
+                    endX: Math.round(finalX + finalWidth),
+                    endY: Math.round(finalY + finalHeight)
+                };
+            } else {
+                // 如果没有视频显示信息，使用窗口坐标（降级处理）
+                console.warn('没有视频显示信息，使用窗口坐标');
+                finalSelectionData = {
+                    x: windowX,
+                    y: windowY,
+                    width: windowWidth,
+                    height: windowHeight,
+                    startX: this.startX,
+                    startY: this.startY,
+                    endX: this.currentX,
+                    endY: this.currentY
+                };
+            }
+            
+            console.log('最终选择数据:', finalSelectionData);
+            
+            const result = await window.electronAPI.completeSelection(finalSelectionData);
             
             if (result.success) {
                 console.log('选择完成，切片窗口已创建');
@@ -282,7 +339,7 @@ class SelectionApp {
         try {
             console.log('开始背景捕获，源ID:', sourceId);
             
-            // 获取桌面捕获流
+            // 获取桌面捕获流 - 移除高分辨率约束，避免黑框问题
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: {
@@ -301,6 +358,47 @@ class SelectionApp {
             video.style.width = '100%';
             video.style.height = '100%';
             video.style.objectFit = 'contain';
+            
+            // 等待视频元数据加载完成后计算坐标转换
+            video.addEventListener('loadedmetadata', () => {
+                console.log('背景视频元数据已加载，尺寸:', video.videoWidth, 'x', video.videoHeight);
+                
+                // 计算视频在选择窗口中的实际显示区域
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                const videoAspectRatio = video.videoWidth / video.videoHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+                
+                let displayWidth, displayHeight, offsetX, offsetY;
+                
+                if (windowAspectRatio > videoAspectRatio) {
+                    // 窗口更宽，按高度缩放，左右居中
+                    displayHeight = windowHeight;
+                    displayWidth = displayHeight * videoAspectRatio;
+                    offsetX = (windowWidth - displayWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // 窗口更高，按宽度缩放，上下居中
+                    displayWidth = windowWidth;
+                    displayHeight = displayWidth / videoAspectRatio;
+                    offsetX = 0;
+                    offsetY = (windowHeight - displayHeight) / 2;
+                }
+                
+                console.log('视频在选择窗口中的显示区域:', {
+                    displayWidth, displayHeight, offsetX, offsetY
+                });
+                
+                // 存储坐标转换信息，供选择时使用
+                this.videoDisplayInfo = {
+                    displayWidth,
+                    displayHeight,
+                    offsetX,
+                    offsetY,
+                    videoWidth: video.videoWidth,
+                    videoHeight: video.videoHeight
+                };
+            });
             
             // 显示到背景显示区域
             const backgroundDisplay = document.getElementById('backgroundDisplay');
@@ -347,4 +445,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // 导出应用类（用于测试）
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SelectionApp;
-} 
+}
